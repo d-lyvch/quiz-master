@@ -1,22 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import quizzes from "../database/quizzes.json";
+import { useAuth } from "../context/AuthContext";
+import AuthModal from "../components/AuthModal";
 
 const Quiz = () => {
   const { id } = useParams();
-  const quiz = quizzes.find((q) => q.id === parseInt(id));
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [selectOption, setSelectOptions] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    if (!quiz || !quiz.questions || quiz.questions.length === 0) {
-      console.error("No quiz or questions found for id:", id);
-      navigate("/error"); // Направляємо на сторінку з помилкою
+    if (!currentUser) {
+      setShowModal(true);
     }
-  }, [quiz, id, navigate]);
+  }, [currentUser]);
+
+  const quiz = quizzes.find((q) => q.id === parseInt(id));
 
   if (!quiz || !quiz.questions || quiz.questions.length === 0) {
     return (
@@ -25,58 +29,105 @@ const Quiz = () => {
   }
 
   const currentQuestionData = quiz.questions[currentQuestion];
-  console.log(currentQuestionData);
+  if (!currentQuestionData) {
+    return <p className="text-red-500">This question does not exist.</p>;
+  }
 
   const handleNext = () => {
     const isCorrect =
       String(currentQuestionData.correctAnswer) === String(selectOption);
 
     if (isCorrect) {
-      setScore(prevScore => prevScore + 1);
+      setScore((prevScore) => prevScore + 1);
     }
 
     if (currentQuestion < quiz.questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
       setSelectOptions(null);
     } else {
-      navigate(`/result`, { state: { score: score + (isCorrect ? 1 : 0), total: quiz.questions.length } });
+      navigate(`/result`, {
+        state: {
+          score: score + (isCorrect ? 1 : 0),
+          total: quiz.questions.length,
+        },
+      });
     }
   };
 
-  console.log("Selected Option:", selectOption);
-  console.log("Correct Answer:", currentQuestionData.correctAnswer);
+  const handlePrevious = () => {
+    if (currentQuestion > 0) {
+      setCurrentQuestion(currentQuestion - 1);
+      setSelectOptions(null);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    navigate("/");
+  };
+
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">{quiz.title}</h1>
-      <div className="mb-4">
-        <h2 className="text-lg font-semibold">
+    <div className="h-screen w-screen flex flex-col items-center justify-center bg-gray-100 px-4">
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">{quiz.title}</h1>
+      <div className="w-full max-w-lg bg-white p-6 rounded-md shadow-md">
+        <div className="flex justify-between mb-4">
+          <span className="text-sm text-gray-600">
+            Question {currentQuestion + 1} of {quiz.questions.length}
+          </span>
+          <span className="text-sm text-gray-600">Score: {score}</span>
+        </div>
+        <h2 className="text-lg font-medium text-gray-700 mb-4">
           {currentQuestionData?.question}
         </h2>
-        <ul>
+        <ul className="space-y-2">
           {currentQuestionData?.options.map((option, index) => (
-            <li key={index} className="mb-2">
-              <label className="flex item-center">
+            <li
+              key={index}
+              className={`bg-white shadow-md p-3 rounded-md hover:bg-gray-100 ${
+                selectOption === option ? "bg-blue-100" : ""
+              }`}
+            >
+              <label className="flex items-center text-gray-800">
                 <input
                   type="radio"
                   name="option"
                   value={option}
                   checked={selectOption === option}
                   onChange={() => setSelectOptions(option)}
-                  className="mr-2"
+                  className="mr-3 accent-blue-500"
                 />
                 {option}
               </label>
             </li>
           ))}
         </ul>
+        <div className="flex justify-between mt-6">
+          <button
+            onClick={handlePrevious}
+            disabled={currentQuestion === 0}
+            className={`px-6 py-3 rounded-md text-white font-medium ${
+              currentQuestion === 0
+                ? "bg-blue-500 hover:bg-blue-600"
+                : "bg-gray-300 cursor-not-allowed"
+            }`}
+          >
+            Previous
+          </button>
+          <button
+            onClick={handleNext}
+            disabled={!selectOption}
+            className={`px-6 py-3 rounded-md text-white font-medium ${
+              selectOption
+                ? "bg-blue-500 hover:bg-blue-600"
+                : "bg-gray-300 cursor-not-allowed"
+            }`}
+          >
+            {currentQuestion < quiz.questions.length - 1 ? "Next" : "Finish"}
+          </button>
+        </div>
       </div>
-      <button
-        onClick={handleNext}
-        disabled={!selectOption}
-        className="bg-blue-500 text-white px-4 py-2 rounded"
-      >
-        {currentQuestion < quiz.questions.length - 1 ? "Next" : "Finish"}
-      </button>
+
+      {showModal && <AuthModal onClose={handleCloseModal} />}
     </div>
   );
 };
