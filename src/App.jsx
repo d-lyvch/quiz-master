@@ -5,9 +5,11 @@ import AppRoutes from "./routes/AppRoutes";
 
 function App() {
   return (
-    <AuthProvider>
-      <AppRoutes />
-    </AuthProvider>
+    <div className="min-h-screen flex flex-col">
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </div>
   );
 }
 

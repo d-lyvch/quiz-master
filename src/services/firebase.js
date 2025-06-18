@@ -1,17 +1,16 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC_sOdQuROrj8QZ1f2E-5NAQqoZZI6Refc",
-  authDomain: "quizmaster-cccd9.firebaseapp.com",
-  projectId: "quizmaster-cccd9",
-  storageBucket: "quizmaster-cccd9.firebasestorage.app",
-  messagingSenderId: "867662056287",
-  appId: "1:867662056287:web:883b6408fcfe2e740a44ea",
-  measurementId: "G-H1P8W6WK91"
+  apiKey: "AIzaSyDfLQ8XKvGU7DMUhlM2ZVy8Sf3RO_QA4Z0",
+  authDomain: "quiztest-b49af.firebaseapp.com",
+  projectId: "quiztest-b49af",
+  storageBucket: "quiztest-b49af.firebasestorage.app",
+  messagingSenderId: "1038873946473",
+  appId: "1:1038873946473:web:5736657bce787ebadff5f8",
+  measurementId: "G-CYKTJGXM4L",
 };
-
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
